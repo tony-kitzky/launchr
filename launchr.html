@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <html>
 <head>
   <title>Launchr -- Peronal Webpage Launcher</title>
@@ -89,7 +90,7 @@
       const li = document.createElement('li');
       li.innerHTML = `
         ${link.title}: ${link.url}
-        <span class="delete-btn" onclick="removeLink('${category}', ${index})">✕</span>
+        <span class="delete-btn" onclick="removeLink('${category}', ${index})">&times;</span>
       `;
       list.appendChild(li);
     });
