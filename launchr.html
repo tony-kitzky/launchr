@@ -131,6 +131,7 @@
 <div class="client-info">
   <h3>Client Information</h3>
   <div class="client-grid">
+    <div class="client-item"><span class="label">Page Loaded</span><span class="value" id="clientLoadedTime">Loading...</span></div>
     <div class="client-item"><span class="label">Browser</span><span class="value" id="clientBrowser">Loading...</span></div>
     <div class="client-item"><span class="label">User Agent</span><span class="value" id="clientUA">Loading...</span></div>
     <div class="client-item"><span class="label">Platform</span><span class="value" id="clientPlatform">Loading...</span></div>
@@ -151,24 +152,24 @@
 <div id="addForm">
   <h3>Add New Website</h3>
   <input type="text" id="linkTitle" placeholder="Website Title">
-  <input type="url" id="linkUrl" placeholder="https://example.com">
+  <input type="text" id="linkUrl" placeholder="https://example.com">
   <select id="linkCategory">
     <option value="work">Work</option>
     <option value="personal">Personal</option>
   </select>
-  <button onclick="addNewLink()">Add Link</button>
+  <button type="button" onclick="addNewLink()">Add Link</button>
 </div>
 
 <div class="category">
   <h2>Work Websites</h2>
   <ul id="workList"></ul>
-  <button onclick="openLinksInOrder('work')">Launch Work Links</button>
+  <button type="button" onclick="openLinksInOrder('work')">Launch Work Links</button>
 </div>
 
 <div class="category">
   <h2>Personal Websites</h2>
   <ul id="personalList"></ul>
-  <button onclick="openLinksInOrder('personal')">Launch Personal Links</button>
+  <button type="button" onclick="openLinksInOrder('personal')">Launch Personal Links</button>
 </div>
 
 <script>
@@ -235,10 +236,10 @@
             <small>${link.url}</small>
           </div>
           <div class="link-actions">
-            <button onclick="editLink('${category}', ${index})">Edit</button>
-            <button onclick="moveLinkUp('${category}', ${index})">Up</button>
-            <button onclick="moveLinkDown('${category}', ${index})">Down</button>
-            <button onclick="removeLink('${category}', ${index})" class="delete-btn">Delete</button>
+            <button type="button" onclick="editLink('${category}', ${index})">Edit</button>
+            <button type="button" onclick="moveLinkUp('${category}', ${index})">Up</button>
+            <button type="button" onclick="moveLinkDown('${category}', ${index})">Down</button>
+            <button type="button" onclick="removeLink('${category}', ${index})" class="delete-btn">Delete</button>
           </div>
         </div>
       `;
@@ -251,7 +252,10 @@
     const url = document.getElementById('linkUrl').value.trim();
     const category = document.getElementById('linkCategory').value;
 
-    if (!title || !url) return;
+    if (!title || !url) {
+      alert('Please enter both a website title and URL.');
+      return;
+    }
 
     const links = getLinks(category);
     links.push({ title, url });
@@ -278,11 +282,7 @@
 
     if (!trimmedTitle || !trimmedUrl) return;
 
-    links[index] = {
-      title: trimmedTitle,
-      url: trimmedUrl
-    };
-
+    links[index] = { title: trimmedTitle, url: trimmedUrl };
     safeSaveLinks();
     displayLinks(category);
   }
@@ -297,7 +297,6 @@
   function moveLinkUp(category, index) {
     const links = getLinks(category);
     if (index <= 0) return;
-
     [links[index - 1], links[index]] = [links[index], links[index - 1]];
     safeSaveLinks();
     displayLinks(category);
@@ -306,7 +305,6 @@
   function moveLinkDown(category, index) {
     const links = getLinks(category);
     if (index >= links.length - 1) return;
-
     [links[index], links[index + 1]] = [links[index + 1], links[index]];
     safeSaveLinks();
     displayLinks(category);
@@ -314,7 +312,6 @@
 
   function openLinksInOrder(category) {
     const links = [...getLinks(category)].reverse();
-
     links.forEach((link, index) => {
       setTimeout(() => {
         window.open(link.url, '_blank', 'noopener,noreferrer');
@@ -323,6 +320,14 @@
   }
 
   async function displayClientInfo() {
+    const pageLoadedAt = new Date();
+    const loadedTimeText = pageLoadedAt.toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'medium',
+      timeZoneName: 'short'
+    });
+    setText('clientLoadedTime', loadedTimeText);
+
     setText('clientBrowser', detectBrowser());
     setText('clientUA', navigator.userAgent || 'Unavailable');
     setText('clientPlatform', navigator.platform || 'Unavailable');
