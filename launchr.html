@@ -255,4 +255,126 @@
     safeSaveLinks();
     displayLinks(category);
 
-    document.getElementById('linkTitl
+    document.getElementById('linkTitle').value = '';
+    document.getElementById('linkUrl').value = '';
+  }
+
+  function editLink(category, index) {
+    const links = getLinks(category);
+    const current = links[index];
+
+    const newTitle = prompt('Edit website title:', current.title);
+    if (newTitle === null) return;
+
+    const newUrl = prompt('Edit website URL:', current.url);
+    if (newUrl === null) return;
+
+    const trimmedTitle = newTitle.trim();
+    const trimmedUrl = newUrl.trim();
+
+    if (!trimmedTitle || !trimmedUrl) return;
+
+    links[index] = {
+      title: trimmedTitle,
+      url: trimmedUrl
+    };
+
+    safeSaveLinks();
+    displayLinks(category);
+  }
+
+  function removeLink(category, index) {
+    const links = getLinks(category);
+    links.splice(index, 1);
+    safeSaveLinks();
+    displayLinks(category);
+  }
+
+  function moveLinkUp(category, index) {
+    const links = getLinks(category);
+    if (index <= 0) return;
+
+    [links[index - 1], links[index]] = [links[index], links[index - 1]];
+    safeSaveLinks();
+    displayLinks(category);
+  }
+
+  function moveLinkDown(category, index) {
+    const links = getLinks(category);
+    if (index >= links.length - 1) return;
+
+    [links[index], links[index + 1]] = [links[index + 1], links[index]];
+    safeSaveLinks();
+    displayLinks(category);
+  }
+
+  function openLinksInOrder(category) {
+    const links = [...getLinks(category)].reverse();
+
+    links.forEach((link, index) => {
+      setTimeout(() => {
+        window.open(link.url, '_blank', 'noopener,noreferrer');
+      }, index * 1000);
+    });
+  }
+
+  async function displayClientInfo() {
+    setText('clientBrowser', detectBrowser());
+    setText('clientUA', navigator.userAgent || 'Unavailable');
+    setText('clientPlatform', navigator.platform || 'Unavailable');
+    setText('clientLanguage', navigator.language || 'Unavailable');
+    setText('clientScreen', `${window.screen.width} x ${window.screen.height}`);
+
+    try {
+      const response = await fetch('https://ipapi.co/json/', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      if (data.error) throw new Error(data.reason || 'Lookup failed');
+
+      const lat = data.latitude;
+      const lon = data.longitude;
+
+      setText('clientIP', data.ip || 'Unavailable');
+      setText('clientASN', data.asn || 'Unavailable');
+      setText('clientOrg', data.org || 'Unavailable');
+      setText('clientCity', data.city || 'Unavailable');
+      setText('clientRegion', data.region || 'Unavailable');
+      setText('clientCountry', data.country_name || data.country || 'Unavailable');
+      setText('clientTimezone', data.timezone || 'Unavailable');
+
+      if (lat != null && lon != null) {
+        setText('clientCoords', `${lat}, ${lon}`);
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lat + ',' + lon)}`;
+        setHTML('clientMap', `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>`);
+      } else {
+        setText('clientCoords', 'Unavailable');
+        setText('clientMap', 'Unavailable');
+      }
+    } catch (error) {
+      setText('clientIP', 'Unavailable');
+      setText('clientASN', 'Unavailable');
+      setText('clientOrg', 'Unavailable');
+      setText('clientCity', 'Unavailable');
+      setText('clientRegion', 'Unavailable');
+      setText('clientCountry', 'Unavailable');
+      setText('clientTimezone', 'Unavailable');
+      setText('clientCoords', 'Unavailable');
+      setText('clientMap', 'Unavailable');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    safeLoadLinks();
+    displayLinks('work');
+    displayLinks('personal');
+    displayClientInfo();
+  });
+</script>
+
+</body>
+</html>
